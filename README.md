@@ -129,5 +129,5 @@ after this the LED should blink
 ### dfu-util permissions problem
 
 ```
-
+todo
 ```

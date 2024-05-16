@@ -131,3 +131,20 @@ after this the LED should blink
 ```
 todo
 ```
+
+# Run Examples
+
+## app-minimal
+```
+cargo run -r -p app-minimal
+```
+
+## blink
+```
+cargo run -r -p blink
+```
+
+## tmc2209-example
+```
+cargo run -r -p tmc2209-example
+```

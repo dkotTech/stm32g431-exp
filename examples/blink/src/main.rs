@@ -11,7 +11,7 @@ use cortex_m_rt::entry; // The runtime
 use hal::{
     self,
     clocks::Clocks,
-    gpio::{Pin, PinMode, Port},
+    gpio::{Edge, Pin, PinMode, Port, Pull},
     pac,
 };
 
@@ -42,6 +42,10 @@ fn main() -> ! {
     let mut led_blue = Pin::new(Port::C, 11, PinMode::Output);
     let mut led_red = Pin::new(Port::C, 10, PinMode::Output);
 
+    let mut button = Pin::new(Port::A, 10, PinMode::Input);
+    button.pull(Pull::Up);
+    button.enable_interrupt(Edge::Rising);
+
     led_green.set_high();
     led_blue.set_high();
     led_red.set_high();
@@ -58,6 +62,12 @@ fn main() -> ! {
         led_red.set_low();
         delay.delay_ms(1_000);
         led_red.set_high();
+
+        if button.is_low() {
+            defmt::println!("low");
+        } else {
+            defmt::println!("hight");
+        }
 
         defmt::println!("Hello, world!");
     }

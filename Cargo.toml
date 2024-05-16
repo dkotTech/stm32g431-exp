@@ -1,7 +1,10 @@
 [workspace]
 resolver = "2"
 members = [
-    "examples/*",
+    "examples/app-minimal",
+    "examples/blink",
+    "examples/tmc2209-example",
+#    "examples/*",
 ]
 
 # cargo build/run

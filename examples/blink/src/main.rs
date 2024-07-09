@@ -38,11 +38,11 @@ fn main() -> ! {
     // Setup a delay, based on the Cortex-m systick.
     let mut delay = Delay::new(cp.SYST, clock_cfg.systick());
 
-    let mut led_green = Pin::new(Port::B, 7, PinMode::Output);
-    let mut led_blue = Pin::new(Port::C, 11, PinMode::Output);
-    let mut led_red = Pin::new(Port::C, 10, PinMode::Output);
+    let mut led_red = Pin::new(Port::B, 13, PinMode::Output);
+    let mut led_green = Pin::new(Port::B, 14, PinMode::Output);
+    let mut led_blue = Pin::new(Port::B, 15, PinMode::Output);
 
-    let mut button = Pin::new(Port::A, 10, PinMode::Input);
+    let mut button = Pin::new(Port::A, 15, PinMode::Input);
     button.pull(Pull::Up);
     button.enable_interrupt(Edge::Rising);
 

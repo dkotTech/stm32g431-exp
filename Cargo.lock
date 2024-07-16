@@ -165,6 +165,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "drv8844-example"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "defmt",
+ "defmt-rtt",
+ "panic-probe",
+ "rtic",
+ "stm32-hal2",
+]
+
+[[package]]
 name = "embedded-hal"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"

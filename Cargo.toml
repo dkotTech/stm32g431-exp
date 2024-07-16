@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "examples/app-minimal",
     "examples/blink",
+    "examples/drv8844-example",
     "examples/tmc2209-example",
 #    "examples/*",
 ]

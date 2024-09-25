@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "dma_pwm_pac",
     "examples/app-minimal",
     "examples/blink",
     "examples/drv8844-example",

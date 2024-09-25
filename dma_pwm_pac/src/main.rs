@@ -1,3 +1,5 @@
+/// thx antoinevg for this example - https://github.com/antoinevg/stm32f3-rust-examples
+
 #![no_main]
 #![no_std]
 

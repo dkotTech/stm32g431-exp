@@ -17,8 +17,9 @@ use hal::{
         TimerInterrupt, UpdateReqSrc,
     },
 };
-pub static BUF: [u16; 4] = [4249, 4249, 4249, 4249];
 
+const STEPS: usize = 128;
+static mut DUTY_CYCLES: [u16; STEPS * 4] = [0; STEPS * 4];
 #[rtic::app(device = pac, peripherals = true)]
 mod app {
     use super::*;
@@ -45,17 +46,15 @@ mod app {
         dr_en.set_high();
 
         // driver step pin for motor pwd control
-        Pin::new(Port::A, 1, PinMode::Alt(1)); // ch1 - in1 - a2 -- ch2
-        Pin::new(Port::A, 0, PinMode::Alt(1)); // ch2 - in2 - a1 -- ch1
-        Pin::new(Port::B, 11, PinMode::Alt(1)); // ch3 - in3 - b1 -- ch4
-        Pin::new(Port::B, 10, PinMode::Alt(1)); // ch4 - in4 - b2 -- ch3
+        Pin::new(Port::A, 1, PinMode::Alt(1)); //   in1 - a2 -- ch2 PA1
+        Pin::new(Port::A, 0, PinMode::Alt(1)); //   in2 - a1 -- ch1 PA0
+        Pin::new(Port::B, 11, PinMode::Alt(1)); //  in3 - b1 -- ch4 PB11
+        Pin::new(Port::B, 10, PinMode::Alt(1)); //  in4 - b2 -- ch3 PB10
     }
 
     #[init]
     fn init(ctx: init::Context) -> (Shared, Local) {
         let dp = ctx.device;
-
-        hal::debug_workaround();
 
         let clock_cfg = Clocks::default();
         clock_cfg.setup().unwrap();
@@ -64,10 +63,10 @@ mod app {
 
         let mut timer_pwd = Timer::new_tim2(
             dp.TIM2,
-            20_000.,
+            500.0,
             TimerConfig {
                 one_pulse_mode: false,
-                update_request_source: UpdateReqSrc::OverUnderFlow,
+                update_request_source: UpdateReqSrc::Any,
                 auto_reload_preload: true,
                 alignment: Alignment::Edge,
                 capture_compare_dma: CaptureCompareDma::Ccx,
@@ -76,20 +75,43 @@ mod app {
             &clock_cfg,
         );
 
-        timer_pwd.enable_pwm_output(TimChannel::C1, OutputCompare::Pwm1, 0.1);
-        timer_pwd.enable_pwm_output(TimChannel::C2, OutputCompare::Pwm1, 0.1);
+        timer_pwd.enable_pwm_output(TimChannel::C1, OutputCompare::Pwm1, 0.0);
+        timer_pwd.enable_pwm_output(TimChannel::C2, OutputCompare::Pwm1, 0.0);
 
-        timer_pwd.enable_pwm_output(TimChannel::C3, OutputCompare::Pwm1, 0.1);
-        timer_pwd.enable_pwm_output(TimChannel::C4, OutputCompare::Pwm1, 0.1);
+        timer_pwd.enable_pwm_output(TimChannel::C3, OutputCompare::Pwm1, 0.0);
+        timer_pwd.enable_pwm_output(TimChannel::C4, OutputCompare::Pwm1, 0.0);
 
-        let mut dma = Dma::new(dp.DMA1);
+        let _dma = Dma::new(dp.DMA1);
+        dma::enable_mux1();
         dma::mux(DmaPeriph::Dma1, DmaChannel::C1, DmaInput::Tim2Up);
 
         timer_pwd.enable_interrupt(TimerInterrupt::UpdateDma);
 
+        let pwm_steps = unsafe { &mut DUTY_CYCLES };
+
+        let max_pwm = (timer_pwd.get_max_duty() / 100 * 10) as u16;
+
+        let quadrature_wave: [[u16; 4]; 4] = [
+            [1, 0, 1, 0], // Шаг 1: IN1 = High, IN2 = Low, IN3 = High, IN4 = Low
+            [0, 1, 1, 0], // Шаг 2: IN1 = Low, IN2 = High, IN3 = High, IN4 = Low
+            [0, 1, 0, 1], // Шаг 3: IN1 = Low, IN2 = High, IN3 = Low, IN4 = High
+            [1, 0, 0, 1], // Шаг 4: IN1 = High, IN2 = Low, IN3 = Low, IN4 = High
+        ];
+
+        for step in 0..STEPS {
+            let base_index = step * 4;
+            let phase = step % 4;
+
+            // Заполняем значения IN1, IN2, IN3, IN4 для данного шага
+            pwm_steps[base_index] = quadrature_wave[phase][0] * max_pwm; // IN1
+            pwm_steps[base_index + 1] = quadrature_wave[phase][1] * max_pwm; // IN2
+            pwm_steps[base_index + 2] = quadrature_wave[phase][2] * max_pwm; // IN3
+            pwm_steps[base_index + 3] = quadrature_wave[phase][3] * max_pwm; // IN4
+        }
+
         unsafe {
             timer_pwd.write_dma_burst(
-                &BUF,
+                &DUTY_CYCLES,
                 13,
                 4,
                 DmaChannel::C1,
@@ -104,7 +126,7 @@ mod app {
             );
         }
 
-        let mut timer = Timer::new_tim3(dp.TIM3, 0.2, Default::default(), &clock_cfg);
+        let mut timer = Timer::new_tim3(dp.TIM3, 1.0, Default::default(), &clock_cfg);
         timer.enable_interrupt(TimerInterrupt::Update);
         timer.enable();
 

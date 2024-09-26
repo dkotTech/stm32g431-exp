@@ -1,8 +1,6 @@
-/// thx antoinevg for this example - https://github.com/antoinevg/stm32f3-rust-examples
-
 #![no_main]
 #![no_std]
-
+/// thx antoinevg for this example - https://github.com/antoinevg/stm32f3-rust-examples
 use hal::gpio::AF1;
 use hal::prelude::*;
 use hal::pwr::PwrExt;

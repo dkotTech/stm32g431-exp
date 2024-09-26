@@ -195,7 +195,6 @@ dependencies = [
  "cortex-m",
  "defmt",
  "defmt-rtt",
- "libm",
  "panic-probe",
  "rtic",
  "stm32-hal2",

@@ -106,9 +106,13 @@ mod app {
     }
 
     #[task(binds = TIM3, local=[timer], shared = [spi1], priority = 2)]
-    fn req_spi_transfer(mut cx: req_spi_transfer::Context) {
+    fn on_timer(mut cx: on_timer::Context) {
         cx.local.timer.clear_interrupt(TimerInterrupt::Update);
+        req_spi_transfer::spawn().expect("can not spawn on_spi_transfer");
+    }
 
+    #[task(priority = 0, shared = [spi1])]
+    async fn req_spi_transfer(mut cx: req_spi_transfer::Context) {
         defmt::println!("transfer_dma");
 
         Pin::new(Port::C, 4, PinMode::Output).set_low();

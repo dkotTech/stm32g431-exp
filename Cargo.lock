@@ -517,6 +517,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
 
 [[package]]
+name = "spi_dma"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "defmt",
+ "defmt-rtt",
+ "panic-probe",
+ "rtic",
+ "stm32-hal2",
+]
+
+[[package]]
 name = "spin"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -564,7 +576,7 @@ dependencies = [
 [[package]]
 name = "stm32g4xx-hal"
 version = "0.0.2"
-source = "git+https://github.com/stm32-rs/stm32g4xx-hal.git?branch=main#906b83ab0e42b5f934212dfdaf1daaa88aa7b49d"
+source = "git+https://github.com/stm32-rs/stm32g4xx-hal.git?branch=main#fca39892ac02673929af55bd44bd447ec524c957"
 dependencies = [
  "bare-metal 0.2.5",
  "bitflags",

@@ -5,6 +5,7 @@ members = [
     "examples/app-minimal",
     "examples/blink",
     "examples/drv8844-example",
+    "examples/spi_dma",
     "examples/tmc2209-example",
 #    "examples/*",
 ]
